@@ -1,7 +1,7 @@
 {
   "name": "logical-promise",
-  "version": "1.0.0",
-  "description": "logical-promise",
+  "version": "0.0.1",
+  "description": "Logical operators on Promises",
   "main": "lib/index.js",
   "module": "src/index.js",
   "scripts": {
@@ -19,7 +19,11 @@
     "url": "git://github.com/kaelzhang/node-logical-promise.git"
   },
   "keywords": [
-    "logical-promise"
+    "logical-promise",
+    "Template-literals",
+    "promise",
+    "ternary operators",
+    "logical operators"
   ],
   "engines": {
     "node": ">=4"

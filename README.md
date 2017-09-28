@@ -42,21 +42,21 @@ import logical, {
 } from 'logical-promise'
 ```
 
-#### 1. By default, if rejected, then go into `OR`
+### 1. By default, if rejected, then go into `OR`
 
 ```js
 logical `${Promise.reject(1)} || ${Promise.resolve(0)}`
 // Promise.resolve(0)
 ```
 
-#### 2. Specify condition method. Equivalent to example 1.
+### 2. Specify condition method. Equivalent to example 1.
 
 ```js
 logical(FULLFILLED) `${Promise.reject(1)} || ${Promise.resolve(0)}`
 // Promise.resolve(0)
 ```
 
-#### 3. Change the behavior using condition method
+### 3. Change the behavior using condition method
 
 ```js
 logical `
@@ -74,7 +74,7 @@ logical(FULLFILLED_AND_TRUE) `
 // Promise.reject(2)
 ```
 
-#### 4. Uses factory functions that return promises.
+### 4. Uses factory functions that return promises.
 
 ```js
 import {
@@ -88,7 +88,7 @@ factory `
 // Promise.reject(1)
 ```
 
-#### 5. You could also use condition method with `factory`
+### 5. You could also use condition method with `factory`
 
 ```js
 factory(FULLFILLED_AND_TRUE) `
@@ -99,7 +99,7 @@ factory(FULLFILLED_AND_TRUE) `
 // Promise.resolve(2)
 ```
 
-#### 6. Ternary operators (`a ? b : c`) are also supported
+### 6. Ternary operators (`a ? b : c`) are also supported
 
 ```js
 const f = n => Promise.resolve(n)
@@ -116,7 +116,7 @@ factory(FULLFILLED_AND_TRUE) `
 // Promise.resolve(4)
 ```
 
-#### 7. `Promise`s are not always required, but it always returns a `Promise`
+### 7. `Promise`s are not always required, but it always returns a `Promise`
 
 ```js
 logical(FULLFILLED_AND_TRUE) `${0} || ${Promise.resolve(1)}`

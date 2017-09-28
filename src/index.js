@@ -1,14 +1,4 @@
-const AND = '&&'
-const OR = '||'
-const NOT = '!'
-const QUESTION_MARK = '?'
-const COLON = ':'
-const LPAREN = '('
-const RPAREN = ')'
-
-
-const wrapPromise = subject => Promise.resolve(subject)
-const wrapPromiseFactory = subject => Promise.resolve(subject())
+import Parser from './parser'
 
 
 export const FULLFILLED = promise => {
@@ -28,29 +18,40 @@ export const FULLFILLED_AND_TRUE = promise => {
 
 export const factory = checker => {
   if (typeof checker === 'function') {
-    return (...args) => _factory(checker, wrapPromiseFactory, ...args)
+    return (...args) => _factory(checker, true, ...args)
   }
 
-  return _factory(FULLFILLED, wrapPromiseFactory, ...args)
+  return _factory(FULLFILLED, true, ...args)
 }
 
 
 export default checker => {
   if (typeof checker === 'function') {
-    return (...args) => _factory(checker, wrapPromise, ...args)
+    return (...args) => _factory(checker, false, ...args)
   }
 
-  return _factory(FULLFILLED, wrapPromise, ...args)
+  return _factory(FULLFILLED, false, ...args)
+}
+
+// Utilities
+////////////////////////////////////////////////////////////////////
+
+const _factory = (checker, useFactory, operators, ...items) => {
+  if (useFactory && !items.every(isFunction)) {
+    throw 'NOT_FUNCTION'
+  }
+
+  const AST = new Parser(operators, promises).parse()
+  return new Runtime(
+    checker,
+    ast,
+    useFactory
+      ? wrapPromiseFactory
+      : wrapPromise
+  ).process()
 }
 
 
-// BNF
-// <expr>    ::= factor || logical
-// <ternary> ::= <term> QUESTION_MARK <expr> COLON <expr>
-// <term>    ::= <item> ( (AND || OR) <item> )*
-// <item>    ::= <factor> | NOT <factor>
-// <factor>  ::= promise | LPAREN <expr> RPAREN
-
-const _factory = (checker, wrapper, operators, ...factories) => {
-
-}
+const isFunction = subject => typeof subject !== 'function'
+const wrapPromise = subject => Promise.resolve(subject)
+const wrapPromiseFactory = subject => Promise.resolve(subject())

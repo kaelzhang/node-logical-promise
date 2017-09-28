@@ -40,19 +40,22 @@ import logical, {
   FULLFILLED,
   FULLFILLED_AND_TRUE
 } from 'logical-promise'
+
+const resolve = n => Promise.resolve(n)
+const reject = n => Promise.reject(n)
 ```
 
-### 1. By default, if rejected, then go into `OR`
+### 1. By default, if rejected, then go into logical `OR`
 
 ```js
-logical `${Promise.reject(1)} || ${Promise.resolve(0)}`
+logical `${reject(1)} || ${resolve(0)}`
 // Promise.resolve(0)
 ```
 
 ### 2. Specify condition method. Equivalent to example 1.
 
 ```js
-logical(FULLFILLED) `${Promise.reject(1)} || ${Promise.resolve(0)}`
+logical(FULLFILLED) `${reject(1)} || ${resolve(0)}`
 // Promise.resolve(0)
 ```
 
@@ -60,16 +63,16 @@ logical(FULLFILLED) `${Promise.reject(1)} || ${Promise.resolve(0)}`
 
 ```js
 logical `
-  ${Promise.reject(1)}
-  || ${Promise.resolve(0)}
-  || ${Promise.resolve(2)}
+  ${reject(1)}
+  || ${resolve(0)}
+  || ${resolve(2)}
 `
 // Promise.resolve(0)
 
 logical(FULLFILLED_AND_TRUE) `
-  ${Promise.reject(1)}
-  || ${Promise.resolve(0)}
-  || ${Promise.reject(2)}
+  ${reject(1)}
+  || ${resolve(0)}
+  || ${reject(2)}
 `
 // Promise.reject(2)
 ```
@@ -88,13 +91,37 @@ factory `
 // Promise.reject(1)
 ```
 
+By using `factory`, we could prevent unnecessary Promise branch from executing. For example:
+
+```js
+import delay from 'delay'
+
+let obj
+const p1 = () => delay(10).then(() => {
+  obj = {a: 1}
+})
+const p2 = () => obj.a
+```
+
+```js
+logical `${p1()} && ${p2()}`   // Booooooooooooom !!!
+```
+
+If use `factory`:
+
+```js
+obj = null
+
+factory `${p1} && ${p2}`       // Promise.resolve(1)
+```
+
 ### 5. You could also use condition method with `factory`
 
 ```js
 factory(FULLFILLED_AND_TRUE) `
-  ${() => Promise.reject(1)}
-  || ${() => Promise.resolve(0)}
-  || ${() => Promise.resolve(2)}
+  ${() => reject(1)}
+  || ${() => resolve(0)}
+  || ${() => resolve(2)}
 `
 // Promise.resolve(2)
 ```
@@ -102,7 +129,7 @@ factory(FULLFILLED_AND_TRUE) `
 ### 6. Ternary operators (`a ? b : c`) are also supported
 
 ```js
-const f = n => Promise.resolve(n)
+const f = n => resolve(n)
 
 factory(FULLFILLED_AND_TRUE) `
   ${f(0)}
@@ -119,7 +146,7 @@ factory(FULLFILLED_AND_TRUE) `
 ### 7. `Promise`s are not always required, but it always returns a `Promise`
 
 ```js
-logical(FULLFILLED_AND_TRUE) `${0} || ${Promise.resolve(1)}`
+logical(FULLFILLED_AND_TRUE) `${0} || ${resolve(1)}`
 // Promise.resolve(1)
 
 factory(FULLFILLED_AND_TRUE) `${() => 0} || ${() => 1}`
@@ -128,12 +155,49 @@ factory(FULLFILLED_AND_TRUE) `${() => 0} || ${() => 1}`
 
 ## Usage
 
-### logical `template`
-### logical(condition) `template`
-### factory `template`
-### factory(condition) `template`
+### logical(operators, ...promises)
+
+```js
+logical `template`
+logical(condition) `template`
+factory `template`
+factory(condition) `template`
+```
 
 - **condition** `function(promise: Promise): Boolean` The method to check whether a expression should be treated as `true`.
+
+Returns `Promise`
+
+## Built-in condition methods.
+
+### `FULLFILLED`
+
+```js
+const FULLFILLED = promise => promise.then(
+  () => true,
+  () => false
+)
+```
+
+### `FULLFILLED_AND_TRUE`
+
+```js
+const FULLFILLED_AND_TRUE = promise => promise.then(
+  result => !!result,
+  () => false
+)
+```
+
+## How does it work
+
+If you have figured it out how [template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals) works, then it is easy to find out that the example 1 is equivalent to:
+
+```js
+// Spaces will be trimmed
+logical(['', ' || ', ''], reject(1), resolve(0))
+```
+
+Template literals do a great job to tokenize the source code for us 😆 ~
 
 ## License
 

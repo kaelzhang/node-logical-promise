@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "module": "src/index.js",
   "scripts": {
-    "build": "BABEL_ENV=babel babel src -d lib",
+    "build": "BABEL_ENV=rollup rollup -c",
     "test": "BABEL_ENV=ava nyc ava --verbose --timeout=10s",
     "prepublish": "npm run build",
     "report-cov": "nyc report --reporter=text-lcov > coverage.lcov && codecov"
@@ -20,7 +20,7 @@
   },
   "keywords": [
     "logical-promise",
-    "Template-literals",
+    "template-literals",
     "promise",
     "ternary operators",
     "logical operators"
@@ -59,8 +59,5 @@
     "rollup": "^0.49.3",
     "rollup-plugin-babel": "^3.0.2",
     "rollup-plugin-node-resolve": "^3.0.0"
-  },
-  "dependencies": {
-    "babel-runtime": "^6.23.0"
   }
 }

@@ -14,11 +14,7 @@
         "transform-exponentiation-operator",
         "transform-async-to-generator",
         "syntax-trailing-function-commas",
-        "transform-inline-environment-variables", [
-          "transform-runtime", {
-            "regenerator": true
-          }
-        ]
+        "transform-inline-environment-variables"
       ]
     },
 
@@ -30,26 +26,7 @@
         "transform-exponentiation-operator",
         "transform-async-to-generator",
         "syntax-trailing-function-commas",
-        "transform-inline-environment-variables", [
-          "transform-runtime", {
-            "regenerator": true
-          }
-        ]
-      ]
-    },
-
-    "rollup": {
-      "plugins": [
-        "transform-class-properties",
-        "transform-object-rest-spread",
-        "transform-exponentiation-operator",
-        "transform-async-to-generator",
-        "syntax-trailing-function-commas",
-        "transform-inline-environment-variables", [
-          "transform-runtime", {
-            "regenerator": true
-          }
-        ]
+        "transform-inline-environment-variables"
       ]
     }
   }

@@ -11,7 +11,7 @@ export default class Runtime {
   }
 
   process () {
-    return this.node(ast)
+    return this.node(this._ast)
   }
 
   node (node) {
@@ -35,14 +35,15 @@ export default class Runtime {
 
     return this._checker(left)
     .then(isTrue => {
+      
       //         |         isTrue
       //         |         1  |         0
       // --------------------------------
       // AND: 0  |  right: 1  |  left : 0
       // OR : 1  |  left : 0  |  right: 1
       return isTrue ^ node.operator === SYMBOL_OR
-        ? left
-        : this.node(node.right)
+        ? this.node(node.right)
+        : left
     })
   }
 

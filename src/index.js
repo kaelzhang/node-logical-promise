@@ -1,4 +1,5 @@
 import Parser from './parser'
+import Runtime from './runtime'
 
 
 export const FULLFILLED = promise => {
@@ -16,8 +17,8 @@ export const FULLFILLED_AND_TRUE = promise => {
 }
 
 
-export const factory = checker => {
-  if (typeof checker === 'function') {
+export const factory = (...args) => {
+  if (typeof args[0] === 'function') {
     return (...args) => _factory(checker, true, ...args)
   }
 
@@ -25,8 +26,8 @@ export const factory = checker => {
 }
 
 
-export default checker => {
-  if (typeof checker === 'function') {
+export default (...args) => {
+  if (typeof args[0] === 'function') {
     return (...args) => _factory(checker, false, ...args)
   }
 
@@ -36,14 +37,14 @@ export default checker => {
 // Utilities
 ////////////////////////////////////////////////////////////////////
 
-const _factory = (checker, useFactory, operators, ...items) => {
+const _factory = (checker, useFactory, operators, items) => {
   if (useFactory && !items.every(isFunction)) {
     throw 'NOT_FUNCTION'
   }
 
-  const AST = new Parser(operators, promises).parse()
+  const AST = new Parser(operators, items).parse()
   return new Runtime(
-    ast,
+    AST,
     checker,
     useFactory
       ? wrapPromiseFactory

@@ -124,11 +124,14 @@ export default class Parser {
     const useOperator = this._useOperatorNext
     this._useOperatorNext = !useOperator
 
-    const current = useOperator
+    const {
+      current,
+      found
+    } = useOperator
       ? this._advanceOperator()
       : this._advancePromise()
 
-    return this._currentToken = current
+    return this._currentToken = found
       ? useOperator
         ? new Token(OPERATORS[current])
         : new Token(PROMISE, current)
@@ -146,7 +149,14 @@ export default class Parser {
     const index = ++ this._operatorPointer
 
     if (index < this._operatorsLength) {
-      return this._operators[index]
+      return {
+        current: this._operators[index],
+        found: true
+      }
+    }
+
+    return {
+      found: false
     }
   }
 
@@ -154,7 +164,14 @@ export default class Parser {
     const index = ++ this._itemsPointer
 
     if (index < this._itemsLength) {
-      return this._items[index]
+      return {
+        current: this._items[index],
+        found: true
+      }
+    }
+
+    return {
+      found: false
     }
   }
 
@@ -192,6 +209,7 @@ export default class Parser {
 
   expr () {
     const or = this.or()
+
     const token = this._currentToken
 
     if (token && token.type === QUESTION_MARK) {
@@ -253,9 +271,9 @@ export default class Parser {
 
     if (token.type === LPAREN) {
       this.advance()
-      const node = this.expr()
+      const expr = this.expr()
       this.test(RPAREN)
-      return node
+      return expr
     }
   }
 }

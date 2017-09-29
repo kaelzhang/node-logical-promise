@@ -4,12 +4,38 @@ import Parser from '../src/parser'
 
 const s = n => Promise.resolve(n)
 
-test('basic', t => {
-  const operators = ['', ' && ', '']
-  const p1 = s(1)
-  const p2 = s(2)
-  const items = [p1, p2]
+test('ternary + and', t => {
+  const operators = ['', ' && ', '?', ':', '']
+  const items = [1, 2, 3, 4]
+
+  // 1 && 2
+  //   ? 3
+  //   : 4
 
   const ast = new Parser(operators, items).parse()
-  console.log(ast)
+  const expect = {
+    type: 'ConditionalExpression',
+    condition: {
+      type: 'LogicalExpression',
+      operator: '&&',
+      left: {
+        type: 'Item',
+        item: 1
+      },
+      right: {
+        type: 'Item',
+        item: 2
+      }
+    },
+    consequent: {
+      type: 'Item',
+      item: 3
+    },
+    alternate: {
+      type: 'Item',
+      item: 4
+    }
+  }
+
+  t.deepEqual(JSON.stringify(ast), JSON.stringify(expect))
 })

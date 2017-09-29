@@ -16,9 +16,12 @@ const COLON = 'COLON'
 const LPAREN = 'LPAREN'
 const RPAREN = 'RPAREN'
 
+const SYMBOL_AND = '&&'
+const SYMBOL_OR = '||'
+
 const OPERATORS = {
-  '&&': AND,
-  '||': OR,
+  [SYMBOL_AND]: AND,
+  [SYMBOL_OR]: OR,
   '!': NOT,
   '?': QUESTION_MARK,
   ':': COLON,
@@ -106,10 +109,6 @@ export default class Parser {
       : operators.slice(start)
   }
 
-  parse () {
-    return this.expr()
-  }
-
   // error (message) {
   //   // TODO
   //   throw message
@@ -135,13 +134,10 @@ export default class Parser {
   }
 
   // Test the current token and go to next
-  eat (type) {
-    if (this._currentToken && this._currentToken === type) {
-      return this.advance()
+  test (type) {
+    if (!this._currentToken || this._currentToken.type !== type) {
+      throw `WRONG_TYPE, expect ${type}`
     }
-
-    // TODO
-    throw 'WRONG_TYPE'
   }
 
   _advanceOperator () {
@@ -182,34 +178,40 @@ export default class Parser {
   // - operators
   // - promise
 
+  parse () {
+    const expr = this.expr()
+
+    if (this._currentToken) {
+      throw 'UNEXPECTED_TOKEN ' + this._currentToken.type
+    }
+
+    return expr
+  }
+
   expr () {
     const or = this.or()
-    this.advance()
-
     const token = this._currentToken
-    if (!token) {
-      return or
-    }
 
-    if (token.type === QUESTION_MARK) {
+    if (token && token.type === QUESTION_MARK) {
+      this.advance()
       const consequent = this.expr()
-      this.eat(COLON)
+      this.test(COLON)
+      this.advance()
       const alternate = this.expr()
-      return ConditionalExpression(or, consequent, alternate)
+      return new ConditionalExpression(or, consequent, alternate)
     }
 
-    throw 'UNEXPECTED_TOKEN'
+    return or
   }
 
   or () {
     const left = this.and()
-    this.advance()
     const token = this._currentToken
 
     if (token && token.type === OR) {
       this.advance()
       const right = this.or()
-      return new LogicalExpression(OR, left, right)
+      return new LogicalExpression(SYMBOL_OR, left, right)
     }
 
     return left
@@ -218,13 +220,12 @@ export default class Parser {
   and () {
     const left = this.not()
     this.advance()
-
     const token = this._currentToken
 
     if (token && token.type === AND) {
       this.advance()
       const right = this.and()
-      return new LogicalExpression(AND, left, right)
+      return new LogicalExpression(SYMBOL_AND, left, right)
     }
 
     return left
@@ -234,6 +235,7 @@ export default class Parser {
     const token = this._currentToken
 
     if (token.type === NOT) {
+      this.advance()
       return new UnaryExpression(this.factor())
     }
 
@@ -248,8 +250,9 @@ export default class Parser {
     }
 
     if (token.type === LPAREN) {
+      this.advance()
       const node = this.expr()
-      this.eat(RPAREN)
+      this.test(RPAREN)
       return node
     }
   }

@@ -1,6 +1,7 @@
 import Lexer from './lexer'
 import Parser from './parser'
 import Runtime from './runtime'
+import err from 'err-object'
 
 
 export const FULLFILLED = promise => {
@@ -19,7 +20,8 @@ export const FULLFILLED_AND_TRUE = promise => {
 
 
 export const factory = (...args) => {
-  if (typeof args[0] === 'function') {
+  const checker = args[0]
+  if (typeof checker === 'function') {
     return (...args) => _factory(checker, true, ...args)
   }
 
@@ -28,7 +30,8 @@ export const factory = (...args) => {
 
 
 export default (...args) => {
-  if (typeof args[0] === 'function') {
+  const checker = args[0]
+  if (typeof checker === 'function') {
     return (...args) => _factory(checker, false, ...args)
   }
 
@@ -38,9 +41,13 @@ export default (...args) => {
 // Utilities
 ////////////////////////////////////////////////////////////////////
 
-const _factory = (checker, useFactory, operators, items) => {
+const _factory = (checker, useFactory, operators, ...items) => {
   if (useFactory && !items.every(isFunction)) {
-    throw 'NOT_FUNCTION'
+    throw err({
+      message: 'only accepts factory functions',
+      name: 'NotFunctionError',
+      code: 'NOT_FUNCTION'
+    }, TypeError)
   }
 
   const lexer = new Lexer(operators, items)
@@ -55,6 +62,6 @@ const _factory = (checker, useFactory, operators, items) => {
 }
 
 
-const isFunction = subject => typeof subject !== 'function'
+const isFunction = subject => typeof subject === 'function'
 const wrapPromise = subject => Promise.resolve(subject)
 const wrapPromiseFactory = subject => Promise.resolve(subject())

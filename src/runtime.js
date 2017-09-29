@@ -28,31 +28,30 @@ export default class Runtime {
 
   UnaryExpression (node) {
     return this.check(node.argument)
+    .then(bool => !bool)
   }
 
   LogicalExpression (node) {
     const left = this.node(node.left)
 
     return this._checker(left)
-    .then(isTrue => {
 
-      //         |         isTrue
-      //         |         1  |         0
-      // --------------------------------
-      // AND: 0  |  right: 1  |  left : 0
-      // OR : 1  |  left : 0  |  right: 1
-      return isTrue ^ node.operator === SYMBOL_OR
-        ? this.node(node.right)
-        : left
-    })
+    //         |         isTrue
+    //         |         1  |         0
+    // --------------------------------
+    // AND: 0  |  right: 1  |  left : 0
+    // OR : 1  |  left : 0  |  right: 1
+    .then(bool => bool ^ node.operator === SYMBOL_OR
+      ? this.node(node.right)
+      : left
+    )
   }
 
   ConditionalExpression (node) {
     return this.check(node.condition)
-    .then(isTrue => {
-      return isTrue
-        ? this.node(node.consequent)
-        : this.node(node.alternate)
-    })
+    .then(bool => bool
+      ? this.node(node.consequent)
+      : this.node(node.alternate)
+    )
   }
 }

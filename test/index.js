@@ -24,7 +24,7 @@ const CASES = [
   '1 && (2 || 3)',
   '0 || 1',
   ['0 || 0', 0],
-  '1 || 0'
+  '!0 && 1'
 ]
 .map(a => {
   const [
@@ -41,16 +41,16 @@ const CASES = [
 
 function run (runner, transformer, hasReject, checker, checkerName) {
   return ([code, expect, reject, only]) => {
-    checkerName = checkerName
-      ? checkerName = `, checker: ${checkerName}`
+    const extra = checkerName
+      ? `, checker: ${checkerName}`
       : ''
 
-    ;(only ? test.only : test)(`factory: ${code}${checkerName}`, async t => {
+    ;(only ? test.only : test)(`${code}${extra}`, async t => {
       const result = checker
         ? runner(checker)(...getArgs(code, transformer))
         : runner(...getArgs(code, transformer))
 
-      if (hasReject, reject !== undefined) {
+      if (hasReject && reject !== undefined) {
         result.then(
           () => {
             t.fail('should reject')
@@ -71,7 +71,8 @@ function run (runner, transformer, hasReject, checker, checkerName) {
 
 
 const numberToPromise = n => Promise.resolve(Number(n))
-const numberToPromiseFactory = n => () => Promise.resolve(Number(n))
+const numberToPromiseFactory = n => () => numberToPromise(n)
+
 const zeroToReject = n => {
   n = Number(n)
   return n
@@ -79,4 +80,30 @@ const zeroToReject = n => {
     : Promise.reject(n)
 }
 
-CASES.forEach(run(logical, zeroToReject, true))
+const zeroToRejectFactory = n => () => zeroToReject(n)
+
+
+CASES.forEach(run(
+  logical, zeroToReject, true, false, 'logical``'))
+
+CASES.forEach(run(
+  logical, numberToPromise, false, FULLFILLED_AND_TRUE,
+  'logical(FULLFILLED_AND_TRUE)``'))
+
+CASES.forEach(run(factory, zeroToRejectFactory, true, false, 'factory``'))
+
+CASES.forEach(run(
+  factory, numberToPromiseFactory, false, FULLFILLED_AND_TRUE,
+  'factory(FULLFILLED_AND_TRUE)``'
+))
+
+test('error: not function', async t => {
+  try {
+    factory `${1} && ${2}`
+  } catch (e) {
+    t.is(e.code, 'NOT_FUNCTION')
+    return
+  }
+
+  t.fail('should throw')
+})

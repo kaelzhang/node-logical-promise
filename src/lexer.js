@@ -77,7 +77,7 @@ export default class Lexer {
 
     return found
       ? useOperator
-        ? new Token(OPERATORS[current])
+        ? new Token(OPERATORS[current] || UNKNOWN, current)
         : new Token(PROMISE, current)
       : null
   }
@@ -134,8 +134,10 @@ export default class Lexer {
     }
 
     const group = current.match(REGEX_MATCH_OPERATORS)
-    // Let parser to deal with the error
-    if (!group.length) {
+
+    // Not a valid operator
+    // and let parser to deal with the error
+    if (!group) {
       this._useOperatorNext = false
 
       return {

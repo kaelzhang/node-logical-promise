@@ -57,14 +57,35 @@ const ast_1and2 = new LogicalExpression('&&', new ItemNode(1), new ItemNode(2))
       new ItemNode(3)
     ),
     new ItemNode(4)
-  )]
+  )],
+  ['1 ?', null, null, SyntaxError],
+  ['1 ? 2', null, null, SyntaxError],
+  ['1 ? 2 a', null, null, SyntaxError],
+  ['2 && 3 a', null, null, SyntaxError]
 ]
-.forEach(([code, expect, only]) => {
-  const [operators, items] = getArgs(code)
+.forEach(([code, expect, only, error]) => {
+  const [operators, ...items] = getArgs(code)
 
   ;(only ? test.only : test)(code, async t => {
     const lexer = new Lexer(operators, items)
-    const ast = new Parser(lexer).parse()
+
+    let ast
+    try {
+      ast = new Parser(lexer).parse()
+    } catch (e) {
+      if (!error) {
+        t.fail('should not fail')
+      }
+
+      t.is(e instanceof error, true)
+
+      return
+    }
+
+    if (error) {
+      t.fail('should fail')
+      return
+    }
 
     t.deepEqual(JSON.stringify(ast), JSON.stringify(expect))
   })

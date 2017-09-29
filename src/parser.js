@@ -1,3 +1,6 @@
+import err from 'err-object'
+
+
 export const EMPTY = ''
 export const PROMISE = 'PROMISE'
 
@@ -12,15 +15,29 @@ const RPAREN = 'RPAREN'
 const SYMBOL_AND = '&&'
 export const SYMBOL_OR = '||'
 const SYMBOL_NOT = '!'
+const SYMBOL_QUESTION_MARK = '?'
+const SYMBOL_COLON = ':'
+const SYMBOL_LPAREN = '('
+const SYMBOL_RPAREN = ')'
 
 export const OPERATORS = {
   [SYMBOL_AND]: AND,
   [SYMBOL_OR]: OR,
   [SYMBOL_NOT]: NOT,
-  '?': QUESTION_MARK,
-  ':': COLON,
-  '(': LPAREN,
-  ')': RPAREN
+  [SYMBOL_QUESTION_MARK]: QUESTION_MARK,
+  [SYMBOL_COLON]: COLON,
+  [SYMBOL_LPAREN]: LPAREN,
+  [SYMBOL_RPAREN]: RPAREN
+}
+
+const SYMBOL_OPERSTORS = {
+  [AND]: SYMBOL_AND,
+  [OR]: SYMBOL_OR,
+  [NOT]: SYMBOL_NOT,
+  [QUESTION_MARK]: SYMBOL_QUESTION_MARK,
+  [COLON]: SYMBOL_COLON,
+  [LPAREN]: SYMBOL_LPAREN,
+  [RPAREN]: SYMBOL_RPAREN
 }
 
 
@@ -76,8 +93,18 @@ export default class Parser {
 
   // Test the current token and go to next
   test (type) {
-    if (!this._currentToken || this._currentToken.type !== type) {
-      throw `WRONG_TYPE, expect ${type}`
+    const token = this._currentToken
+
+    if (!token) {
+      throw err({
+        message: `unexpected end of input, "${SYMBOL_OPERSTORS[type]}" expected.`
+      }, SyntaxError)
+    }
+
+    if (token.type !== type) {
+      throw err({
+        message: `unexpected token "${token.value}", "${SYMBOL_OPERSTORS[type]}" expected.`
+      }, SyntaxError)
     }
   }
 
@@ -106,8 +133,10 @@ export default class Parser {
   parse () {
     const expr = this.expr()
 
-    if (this._currentToken) { console.log(this._currentToken)
-      throw 'UNEXPECTED_TOKEN ' + this._currentToken.type
+    if (this._currentToken) {
+      throw err({
+        message: `unexpected token "${this._currentToken.value}".`
+      }, SyntaxError)
     }
 
     return expr
@@ -160,7 +189,7 @@ export default class Parser {
   not () {
     const token = this._currentToken
 
-    if (token.type === NOT) {
+    if (token && token.type === NOT) {
       this.advance()
       return new UnaryExpression(SYMBOL_NOT, this.factor())
     }
@@ -170,6 +199,10 @@ export default class Parser {
 
   factor () {
     const token = this._currentToken
+
+    if (!token) {
+      return
+    }
 
     if (token.type === PROMISE) {
       return new ItemNode(token.value)

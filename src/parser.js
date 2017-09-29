@@ -52,7 +52,7 @@ export class UnaryExpression extends Node {
   }
 }
 
-export class LogicalExpression {
+export class LogicalExpression extends Node {
   constructor (operator, left, right) {
     super('LogicalExpression')
     this.operator = operator
@@ -120,15 +120,15 @@ export default class Parser {
 
   // Reader go to next
   advance () {
-    const isOperator = this._useOperatorNext
-    this._useOperatorNext = !isOperator
+    const useOperator = this._useOperatorNext
+    this._useOperatorNext = !useOperator
 
-    const current =
+    const current = useOperator
       ? this._advanceOperator()
       : this._advancePromise()
 
-    return this._current = current
-      ? isOperator
+    return this._currentToken = current
+      ? useOperator
         ? new Token(OPERATORS[current])
         : new Token(PROMISE, current)
       : null
@@ -153,10 +153,10 @@ export default class Parser {
   }
 
   _advancePromise () {
-    const index = ++ this._promisePointer
+    const index = ++ this._itemsPointer
 
-    if (index < this._promisesLength) {
-      return this._promises[index]
+    if (index < this._itemsLength) {
+      return this._items[index]
     }
   }
 

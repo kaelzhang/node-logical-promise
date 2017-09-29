@@ -7,6 +7,7 @@
   "scripts": {
     "build": "BABEL_ENV=rollup rollup -c",
     "test": "BABEL_ENV=ava nyc ava --verbose --timeout=10s",
+    "test-no-cov": "BABEL_ENV=ava ava --verbose --timeout=10s",
     "prepublish": "npm run build",
     "report-cov": "nyc report --reporter=text-lcov > coverage.lcov && codecov"
   },

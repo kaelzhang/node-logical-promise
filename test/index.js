@@ -107,3 +107,8 @@ test('error: not function', async t => {
 
   t.fail('should throw')
 })
+
+
+test('real', async t => {
+  t.is(await logical(FULLFILLED_AND_TRUE) `${0} || ${2}`, 2)
+})

@@ -5,7 +5,32 @@ import {
 } from './parser'
 
 const UNKNOWN = 'UNKNOWN'
+
 const REGEX_MATCH_OPERATORS = /&&|\|\||[!?:()]/g
+
+const splitToken = token => {
+  const matched = token.match(REGEX_MATCH_OPERATORS)
+  if (!matched) {
+    return
+  }
+
+  const splitted = token
+  .split(REGEX_MATCH_OPERATORS)
+  .map(str => str.trim())
+
+  return splitted.reduce((prev, current, i) => {
+    if (current) {
+      prev.push(current)
+    }
+
+    if (matched[i]) {
+      prev.push(matched[i])
+    }
+
+    return prev
+
+  }, [])
+}
 
 const REGEX_SINGLE_LINE_COMMENT = /\/\/\S*(?:\n|\r)/g
 const trimAndRemoveComments = str =>
@@ -133,7 +158,7 @@ export default class Lexer {
       }
     }
 
-    const group = current.match(REGEX_MATCH_OPERATORS)
+    const group = splitToken(current)
 
     // Not a valid operator
     // and let parser to deal with the error

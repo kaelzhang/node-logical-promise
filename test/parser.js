@@ -10,7 +10,6 @@ import {
   getArgs
 } from './lib/utils'
 
-
 const join = (array, seperators) => {
   return array.reduce((prev, current, index) => {
     return prev + (
@@ -20,7 +19,6 @@ const join = (array, seperators) => {
     ) + current
   }, '')
 }
-
 
 const ast_1and2 = new LogicalExpression('&&', new ItemNode(1), new ItemNode(2))
 

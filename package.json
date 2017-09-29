@@ -1,6 +1,6 @@
 {
   "name": "logical-promise",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Logical operators on Promises",
   "main": "lib/index.js",
   "module": "src/index.js",

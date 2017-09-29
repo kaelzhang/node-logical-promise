@@ -201,7 +201,9 @@ export default class Parser {
     const token = this._currentToken
 
     if (!token) {
-      return
+      throw err({
+        message: 'unexpected end of input.'
+      }, SyntaxError)
     }
 
     if (token.type === PROMISE) {
@@ -214,5 +216,9 @@ export default class Parser {
       this.test(RPAREN)
       return expr
     }
+
+    throw err({
+      message: `unexpected token "${token.value}"`
+    }, SyntaxError)
   }
 }

@@ -112,3 +112,14 @@ test('error: not function', async t => {
 test('real', async t => {
   t.is(await logical(FULLFILLED_AND_TRUE) `${0} || ${2}`, 2)
 })
+
+test('fail', async t => {
+  try {
+    await logical `1 && 2`
+  } catch (e) {
+    t.is(e instanceof SyntaxError, true)
+    return
+  }
+
+  t.fail('should fail')
+})

@@ -17,12 +17,13 @@ const LPAREN = 'LPAREN'
 const RPAREN = 'RPAREN'
 
 const SYMBOL_AND = '&&'
-const SYMBOL_OR = '||'
+export const SYMBOL_OR = '||'
+const SYMBOL_NOT = '!'
 
 const OPERATORS = {
   [SYMBOL_AND]: AND,
   [SYMBOL_OR]: OR,
-  '!': NOT,
+  [SYMBOL_NOT]: NOT,
   '?': QUESTION_MARK,
   ':': COLON,
   '(': LPAREN,
@@ -49,8 +50,9 @@ export class ItemNode extends Node {
 }
 
 export class UnaryExpression extends Node {
-  constructor (argument) {
+  constructor (operator, argument) {
     super('UnaryExpression')
+    this.operator = operator
     this.argument = argument
   }
 }
@@ -236,7 +238,7 @@ export default class Parser {
 
     if (token.type === NOT) {
       this.advance()
-      return new UnaryExpression(this.factor())
+      return new UnaryExpression(SYMBOL_NOT, this.factor())
     }
 
     return this.factor()

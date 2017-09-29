@@ -43,8 +43,8 @@ const _factory = (checker, useFactory, operators, ...items) => {
 
   const AST = new Parser(operators, promises).parse()
   return new Runtime(
-    checker,
     ast,
+    checker,
     useFactory
       ? wrapPromiseFactory
       : wrapPromise

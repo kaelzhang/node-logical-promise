@@ -5,6 +5,7 @@ import Parser, {
   UnaryExpression,
   ConditionalExpression
 } from '../src/parser'
+import Lexer from '../src/lexer'
 import {
   getArgs
 } from './lib/utils'
@@ -38,13 +39,32 @@ const ast_1and2 = new LogicalExpression('&&', new ItemNode(1), new ItemNode(2))
     new ConditionalExpression(new ItemNode(3), new ItemNode(4), new ItemNode(5)),
     new ItemNode(6)
   )],
-  ['!2', new UnaryExpression('!', new ItemNode(2))]
+  ['!2', new UnaryExpression('!', new ItemNode(2))],
+  ['1 && (2 || 3)', new LogicalExpression(
+    '&&',
+    new ItemNode(1),
+    new LogicalExpression(
+      '||',
+      new ItemNode(2),
+      new ItemNode(3)
+    )
+  )],
+  ['1 ? (2 || 3) : 4', new ConditionalExpression(
+    new ItemNode(1),
+    new LogicalExpression(
+      '||',
+      new ItemNode(2),
+      new ItemNode(3)
+    ),
+    new ItemNode(4)
+  )]
 ]
 .forEach(([code, expect, only]) => {
   const [operators, items] = getArgs(code)
 
   ;(only ? test.only : test)(code, async t => {
-    const ast = new Parser(operators, items).parse()
+    const lexer = new Lexer(operators, items)
+    const ast = new Parser(lexer).parse()
 
     t.deepEqual(JSON.stringify(ast), JSON.stringify(expect))
   })

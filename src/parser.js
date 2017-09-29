@@ -1,12 +1,5 @@
-const REGEX_SINGLE_LINE_COMMENT = /\/\/\S*(?:\n|\r)/g
-const trimAndRemoveComments = str =>
-  str
-  .replace(REGEX_SINGLE_LINE_COMMENT, '')
-  .trim()
-
-
-const EMPTY = ''
-const PROMISE = 'PROMISE'
+export const EMPTY = ''
+export const PROMISE = 'PROMISE'
 
 const AND = 'AND'
 const OR = 'OR'
@@ -20,7 +13,7 @@ const SYMBOL_AND = '&&'
 export const SYMBOL_OR = '||'
 const SYMBOL_NOT = '!'
 
-const OPERATORS = {
+export const OPERATORS = {
   [SYMBOL_AND]: AND,
   [SYMBOL_OR]: OR,
   [SYMBOL_NOT]: NOT,
@@ -30,11 +23,6 @@ const OPERATORS = {
   ')': RPAREN
 }
 
-
-function Token (type, value = null) {
-  this.type = type
-  this.value = value
-}
 
 class Node {
   constructor (type) {
@@ -77,101 +65,19 @@ export class ConditionalExpression extends Node {
 
 
 export default class Parser {
-  constructor (operators, items) {
-    this._operatorPointer = -1
-    this._itemsPointer = -1
-    this._useOperatorNext = true
-
-    this._offset = 0
-    this._originalOperators = operators
-    this._operators = this._cleanOperators(operators)
-    .map(trimAndRemoveComments)
-    this._items = items
-
-    this._currentToken = null
-
-    this._operatorsLength = this._operators.length
-    this._itemsLength = this._items.length
-
+  constructor (lexer) {
+    this._lexer = lexer
     this.advance()
   }
 
-  // `${a} && ${b}` -> ['', ' && ', ${b}]
-  _cleanOperators (operators) {
-    let start = 0
-
-    if (operators[0] === EMPTY) {
-      start = 1
-      this._useOperatorNext = false
-      this._offset = 1
-    }
-
-    return operators[operators.length - 1] === EMPTY
-      ? operators.slice(start, -1)
-      : operators.slice(start)
-  }
-
-  // error (message) {
-  //   // TODO
-  //   throw message
-  // }
-
-  // Lexer
-  ////////////////////////////////////////////////////////////////////
-
-  // Reader go to next
   advance () {
-    const useOperator = this._useOperatorNext
-    this._useOperatorNext = !useOperator
-
-    const {
-      current,
-      found
-    } = useOperator
-      ? this._advanceOperator()
-      : this._advancePromise()
-
-    return this._currentToken = found
-      ? useOperator
-        ? new Token(OPERATORS[current])
-        : new Token(PROMISE, current)
-      : null
+    this._currentToken = this._lexer.advance()
   }
 
   // Test the current token and go to next
   test (type) {
     if (!this._currentToken || this._currentToken.type !== type) {
       throw `WRONG_TYPE, expect ${type}`
-    }
-  }
-
-  _advanceOperator () {
-    const index = ++ this._operatorPointer
-
-    if (index < this._operatorsLength) {
-      return {
-        current: this._operators[index],
-        found: true
-      }
-    }
-
-    return {
-      found: false
-    }
-  }
-
-  _advancePromise () {
-    const index = ++ this._itemsPointer
-
-    if (index < this._itemsLength) {
-      return {
-        current: this._items[index],
-        found: true
-      }
-    }
-
-    return {
-      found: false
     }
   }
 
@@ -200,7 +106,7 @@ export default class Parser {
   parse () {
     const expr = this.expr()
 
-    if (this._currentToken) {
+    if (this._currentToken) { console.log(this._currentToken)
       throw 'UNEXPECTED_TOKEN ' + this._currentToken.type
     }
 

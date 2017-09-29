@@ -35,7 +35,7 @@ export default class Runtime {
 
     return this._checker(left)
     .then(isTrue => {
-      
+
       //         |         isTrue
       //         |         1  |         0
       // --------------------------------
@@ -47,12 +47,12 @@ export default class Runtime {
     })
   }
 
-  ConditionalExpression (condition, consequent, alternate) {
-    return this.check(condition)
+  ConditionalExpression (node) {
+    return this.check(node.condition)
     .then(isTrue => {
       return isTrue
-        ? this.node(consequent)
-        : this.node(alternate)
+        ? this.node(node.consequent)
+        : this.node(node.alternate)
     })
   }
 }

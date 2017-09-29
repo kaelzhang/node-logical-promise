@@ -1,3 +1,4 @@
+import Lexer from './lexer'
 import Parser from './parser'
 import Runtime from './runtime'
 
@@ -42,7 +43,8 @@ const _factory = (checker, useFactory, operators, items) => {
     throw 'NOT_FUNCTION'
   }
 
-  const AST = new Parser(operators, items).parse()
+  const lexer = new Lexer(operators, items)
+  const AST = new Parser(lexer).parse()
   return new Runtime(
     AST,
     checker,

@@ -52,12 +52,15 @@ const _factory = (checker, useFactory, operators, ...items) => {
 
   const lexer = new Lexer(operators, items)
   const AST = new Parser(lexer).parse()
+  const testAllBranch = !useFactory
+
   return new Runtime(
     AST,
     checker,
     useFactory
       ? wrapPromiseFactory
-      : wrapPromise
+      : wrapPromise,
+    testAllBranch
   ).process()
 }
 

@@ -24,7 +24,9 @@ const CASES = [
   '1 && (2 || 3)',
   '0 || 1',
   ['0 || 0', 0],
-  '!0 && 1'
+  '!0 && 1',
+  '1 || 0',
+  '1 ? 1 : 0'
 ]
 .map(a => {
   const [
@@ -122,4 +124,17 @@ test('fail', async t => {
   }
 
   t.fail('should fail')
+})
+
+test('factory: branch retain unreachable', async t => {
+  let boom = false
+  const p1 = () => {
+    boom = true
+    return 1
+  }
+
+  const p2 = () => 2
+
+  await factory `${p2} || ${p1}`
+  t.is(boom, false)
 })

@@ -4,10 +4,11 @@ import {
 
 
 export default class Runtime {
-  constructor (ast, checker, wrapper) {
+  constructor (ast, checker, wrapper, testAllBranch) {
     this._ast = ast
     this._checker = checker
     this._wrapper = wrapper
+    this._testAll = testAllBranch
   }
 
   process () {
@@ -41,17 +42,37 @@ export default class Runtime {
     // --------------------------------
     // AND: 0  |  right: 1  |  left : 0
     // OR : 1  |  left : 0  |  right: 1
-    .then(bool => bool ^ node.operator === SYMBOL_OR
-      ? this.node(node.right)
-      : left
-    )
+    .then(bool => {
+
+      const useRight = bool ^ node.operator === SYMBOL_OR
+
+      if (useRight) {
+        return this.node(node.right)
+      }
+
+      // Some unreachable branch might cause an unhandled rejection
+      if (this._testAll) {
+        return this.check(node.right).then(() => left)
+      }
+
+      return left
+    })
   }
 
   ConditionalExpression (node) {
     return this.check(node.condition)
-    .then(bool => bool
-      ? this.node(node.consequent)
-      : this.node(node.alternate)
-    )
+    .then(bool => {
+      if (this._testAll) {
+        const consequent = this.node(node.consequent)
+        const alternate = this.node(node.alternate)
+        return bool
+          ? this._checker(alternate).then(() => consequent)
+          : this._checker(consequent).then(() => alternate)
+      }
+
+      return bool
+        ? this.node(node.consequent)
+        : this.node(node.alternate)
+    })
   }
 }
